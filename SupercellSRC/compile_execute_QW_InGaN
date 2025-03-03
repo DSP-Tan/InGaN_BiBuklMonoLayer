@@ -1,0 +1,118 @@
+#!/bin/bash
+
+#This program takes the well width and well width fluctuation (wwf) paramters and creates supercells ready to
+#be input into the Gulp to lammps program.
+#The first argument is the random number seed.
+#These are 64, 64, 40 shell supercells with  Indium contents specified in the variable ${Indium}
+
+#This script is to remain in the Supercell directory. It can be called
+#from other directories. The script may not work if the .f files are changed,
+#since the positions of the substitutions are hardcoded.
+
+N1=64
+N2=64
+N3=40
+
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"   ## This gives the location of where this script is. 
+# It will work as long as the last component of the path used to find the script is not a symlink (directory links are OK). 
+# If you also want to resolve any links to the script itself, you need a multi-line 
+# solution... see: http://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
+
+if [ $# -lt 7 ]; then
+  echo 'The arguments to this script are:'
+  echo '{Seed} {IndiumContent(%)} {wellstart} {wellend} {wwf: true or false}  {wwfstart} {wwfend}'
+  echo 1>&2 "$0: not enough arguments"
+  exit 2
+elif [ $# -gt 7 ]; then
+  echo 'The arguments to this script are:'
+  echo "{Seed} {IndiumContent(%)} {wellstart} {wellend} {wwf: true or false} {wwfstart} {wwfend}"
+  echo 1>&2 "$0: too many arguments"
+  exit 2
+fi
+
+Seed=$1
+Indium=$2
+wellstart=$3
+wellend=$4
+wwf=$5
+wwfstart=$6
+wwfend=$7
+
+echo "Seed = ${Seed}" > Compile_Exec.txt
+echo "Indium Content = ${Indium}" >> Compile_Exec.txt
+echo "well starts at nz = ${wellstart}" >> Compile_Exec.txt
+echo "well ends at nz = ${wellend}" >> Compile_Exec.txt
+echo "wwf is ${wwf}" >> Compile_Exec.txt
+echo "well width fluctuation starts at  = ${wwfstart}" >> Compile_Exec.txt
+echo "well width fluctuation ends at = ${wwfend}" >> Compile_Exec.txt
+
+#You should specify the lines of these relacements.
+
+# -i means edit the file in place  
+# -g means replace globally
+# is fixed to a single line.
+
+#First make the sc_GaN.dat using supercellsub.f. This is pure GaN.
+
+sed -e '9s-parameter(n1=2)-parameter(n1='$N1')-g'  $DIR/supercellsub.f > supercellsub_seed_${Seed}.f
+sed -i -e '10s-parameter(n2=2)-parameter(n2='$N2')-g' supercellsub_seed_${Seed}.f
+sed -i -e '11s-parameter(n3=2)-parameter(n3='$N3')-g' supercellsub_seed_${Seed}.f
+sed -i -e '58s-idum=2-idum='${Seed}'-g' supercellsub_seed_${Seed}.f
+gfortran -o supercellsub.out supercellsub_seed_${Seed}.f
+./supercellsub.out
+
+cp supercell.dat sc_GaN.dat; rm supercell.dat
+
+#Then make the sc_InGaN.dat using supercellwell.f. This is Indium InxGa1-xN; where x = ${Indium}
+
+sed -e '9s-parameter(n1=2)-parameter(n1='$N1')-g'  $DIR/supercellwell.f > supercellwell_seed_${Seed}.f
+sed -i -e '10s-parameter(n2=2)-parameter(n2='$N2')-g' supercellwell_seed_${Seed}.f
+sed -i -e '11s-parameter(n3=2)-parameter(n3='$N3')-g' supercellwell_seed_${Seed}.f
+sed -i -e '58s-idum=2-idum='${Seed}'-g' supercellwell_seed_${Seed}.f
+
+if [ $Indium == "100" ]
+  then
+    sed -i -e 's-y=0.15d0-y=1.0d0-g' supercellwell_seed_${Seed}.f
+  else
+    sed -i -e 's-y=0.15d0-y=0.'${Indium}'d0-g' supercellwell_seed_${Seed}.f
+  fi
+
+gfortran -o supercellwell.out supercellwell_seed_${Seed}.f
+./supercellwell.out
+
+cp supercell.dat sc_InGaN.dat; rm supercell.dat
+
+
+#Then run composite.f90 with the correct wwf parameters. well start, well end, wwf start, wwf end
+
+sed    '23s/ifinal=2/ifinal='$N1'/g' $DIR/composite.f90 > composite_seed_${Seed}.f90
+sed -i 's/kstart=18/kstart='${wellstart}'/g'              composite_seed_${Seed}.f90
+sed -i 's/kfinal=22/kfinal='${wellend}'/g'                composite_seed_${Seed}.f90
+sed -i 's/disk = .true./disk = .'${wwf}'./g'              composite_seed_${Seed}.f90
+sed -i 's/diskstart = 23/diskstart = '${wwfstart}'/g'     composite_seed_${Seed}.f90
+sed -i 's/diskfinal = 24/diskfinal = '${wwfend}'/g'       composite_seed_${Seed}.f90
+sed -i '17s-parameter(n1=2)-parameter(n1='$N1')-g'        composite_seed_${Seed}.f90
+sed -i '18s-parameter(n2=2)-parameter(n2='$N2')-g'        composite_seed_${Seed}.f90
+sed -i '19s-parameter(n3=2)-parameter(n3='$N3')-g'        composite_seed_${Seed}.f90
+gfortran -o composite.out composite_seed_${Seed}.f90
+./composite.out
+
+# Then run sc_nitrogen_label.f this labels the nitrogen atoms according to their environments, so that they are assigned the correct effective charges.
+
+sed -e '27s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$N1',n2='$N2',n3='$N3')-g' $DIR/sc_nitrogen_label.f > sc_nitrogen_label_seed_${Seed}.f
+gfortran -o sc_nitrogen_label.out sc_nitrogen_label_seed_${Seed}.f
+./sc_nitrogen_label.out
+
+# Then layer_label.f. This labels whether the atoms are in the upper or lower layers, to artificially for the non-ideal c/a ratio.
+sed -e '10s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$N1',n2='$N2',n3='$N3')-g' $DIR/layer_label.f > layer_label_seed_${Seed}.f
+gfortran -o layer_label.out layer_label_seed_${Seed}.f
+./layer_label.out
+
+sed -i -e '1,3s/^[ \t]*//' supercell_corr2.dat
+
+#s/ : Substitute command ~ replacement for pattern (^[ \t]*) on each addressed line
+#^[ \t]* : Search pattern ( ^ – start of the line; [ \t]* match one or more blank spaces including tab)
+#// : Replace (delete) all matched pattern
+
+rm supercell.dat bonds.dat supercell_corr.dat *.out 

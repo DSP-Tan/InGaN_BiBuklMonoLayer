@@ -1,0 +1,240 @@
+LAMMPS (16 Feb 2016)
+# Initialize:
+
+clear
+units metal
+dimension 3
+boundary p p p
+atom_style full
+
+angle_style class2
+bond_style class2
+
+# Read the atom positions from data file
+read_data data.lammps
+  orthogonal box = (0 0 0) to (204.096 176.747 103.72)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  327680 atoms
+  scanning bonds ...
+  4 = max bonds/atom
+  scanning angles ...
+  6 = max angles/atom
+  reading bonds ...
+  655360 bonds
+  reading angles ...
+  1966080 angles
+  4 = max # of 1-2 neighbors
+  12 = max # of 1-3 neighbors
+  48 = max # of 1-4 neighbors
+  41 = max # of special neighbors
+
+neighbor 2.1 bin
+#neigh_modify once yes
+#neigh_modify delay 10 check yes
+#neigh_modify binsize 10
+#neigh_modify binsize 6
+
+#atom_modify sort 100 10
+
+special_bonds lj/coul 1.0 1.0 1.0
+  4 = max # of 1-2 neighbors
+  4 = max # of special neighbors
+pair_style coul/long 15
+pair_coeff * *
+pair_modify table 0
+kspace_style pppm 1e-8
+
+dump     1    all  custom 10000 dump.lammps   id   x      y      z
+dump_modify 1 format "%6d %11.6lf %11.6lf %11.6lf"
+restart 10000 large*.restart
+
+group corner id 1
+1 atoms in group corner
+fix cornerfix corner setforce 0.0 0.0 0.0
+thermo_style custom step pe ebond epair eangle
+
+min_modify line quadratic
+min_style cg
+
+
+#Relax only atomic positions with low tolerance
+minimize 1e-12 1e-12 5000000 100000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+PPPM initialization ...
+  G vector (1/distance) = 0.269764
+  grid = 540 480 360
+  stencil order = 5
+  estimated absolute RMS force accuracy = 1.77646e-07
+  estimated relative force accuracy = 1.23368e-08
+  using double precision FFTs
+  3d grid and FFT values/proc = 13612483 11664000
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 17.1
+  ghost atom cutoff = 17.1
+  binsize = 8.55 -> bins = 24 21 13
+Memory usage per processor = 1597.99 Mbytes
+Step PotEng E_bond E_pair E_angle 
+       0   -2959492.4   -1489290.2   -1470773.3    571.10758 
+     135     -2961484   -1491547.4   -1470188.7    252.10143 
+Loop time of 8627.06 on 8 procs for 135 steps with 327680 atoms
+
+99.9% CPU use with 8 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -2959492.38536     -2961483.99137     -2961483.99137
+  Force two-norm initial, final = 390.982 0.0083755
+  Force max component initial, final = 2.58139 4.46232e-05
+  Final line search alpha, max atom move = 1 4.46232e-05
+  Iterations, force evaluations = 135 270
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 917.38     | 957.7      | 1020.6     | 114.5 | 11.10
+Bond    | 24.418     | 26.237     | 28.45      |  25.1 |  0.30
+Kspace  | 7566       | 7631.5     | 7673.6     |  42.0 | 88.46
+Neigh   | 2.6692     | 2.6757     | 2.6823     |   0.3 |  0.03
+Comm    | 4.3471     | 4.6743     | 4.989      |   9.8 |  0.05
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.031909   | 0.03635    | 0.042942   |   1.7 |  0.00
+Other   |            | 4.269      |            |       |  0.05
+
+Nlocal:    40960 ave 43256 max 39392 min
+Histogram: 2 1 0 1 1 1 1 0 0 1
+Nghost:    83879 ave 85447 max 81583 min
+Histogram: 1 0 0 1 1 1 1 0 1 2
+Neighs:    3.77835e+07 ave 3.99151e+07 max 3.63388e+07 min
+Histogram: 2 1 0 1 1 1 1 0 0 1
+
+Total # of neighbors = 302268025
+Ave neighs/atom = 922.449
+Ave special neighs/atom = 4
+Neighbor list builds = 1
+Dangerous builds = 0
+
+#Relax with fix box relax and higher tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0
+minimize 1e-25 1e-25 5000000 100000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+PPPM initialization ...
+  G vector (1/distance) = 0.269764
+  grid = 540 480 360
+  stencil order = 5
+  estimated absolute RMS force accuracy = 1.77646e-07
+  estimated relative force accuracy = 1.23368e-08
+  using double precision FFTs
+  3d grid and FFT values/proc = 13612483 11664000
+Memory usage per processor = 1598.03 Mbytes
+Step PotEng E_bond E_pair E_angle 
+     135     -2961484   -1491547.4   -1470188.7    252.10143 
+     145   -2961486.5   -1491911.2   -1469811.6    236.31802 
+Loop time of 1696.63 on 8 procs for 10 steps with 327680 atoms
+
+99.9% CPU use with 8 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -2961483.99137     -2961486.47013     -2961486.47013
+  Force two-norm initial, final = 6676.97 0.499805
+  Force max component initial, final = 6676.97 0.489749
+  Final line search alpha, max atom move = 4.83536e-08 2.36811e-08
+  Iterations, force evaluations = 10 37
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 128.61     | 135.54     | 142.2      |  40.7 |  7.99
+Bond    | 3.6584     | 3.9711     | 4.1495     |   8.8 |  0.23
+Kspace  | 1133.3     | 1140.1     | 1147.3     |  14.5 | 67.20
+Neigh   | 2.6214     | 2.6247     | 2.6277     |   0.2 |  0.15
+Comm    | 0.70493    | 0.73598    | 0.76384    |   2.3 |  0.04
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.0045531  | 0.0055715  | 0.0074761  |   1.1 |  0.00
+Other   |            | 413.7      |            |       | 24.38
+
+Nlocal:    40960 ave 43256 max 39392 min
+Histogram: 2 1 0 1 1 1 1 0 0 1
+Nghost:    83879 ave 85447 max 81583 min
+Histogram: 1 0 0 1 1 1 1 0 1 2
+Neighs:    3.77819e+07 ave 3.99151e+07 max 3.63353e+07 min
+Histogram: 2 1 0 1 1 1 1 0 0 1
+
+Total # of neighbors = 302255412
+Ave neighs/atom = 922.41
+Ave special neighs/atom = 4
+Neighbor list builds = 1
+Dangerous builds = 0
+
+#Relax with with nreset and high tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0 nreset 100
+minimize 1e-25 1e-25 5000000 100000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+PPPM initialization ...
+  G vector (1/distance) = 0.269759
+  grid = 540 480 360
+  stencil order = 5
+  estimated absolute RMS force accuracy = 1.77706e-07
+  estimated relative force accuracy = 1.2341e-08
+  using double precision FFTs
+  3d grid and FFT values/proc = 13612483 11664000
+Memory usage per processor = 1598.03 Mbytes
+Step PotEng E_bond E_pair E_angle 
+     145   -2961486.5   -1491911.2   -1469811.6    236.31802 
+     146   -2961486.5   -1491911.2   -1469811.6    236.31802 
+Loop time of 1196.41 on 8 procs for 1 steps with 327680 atoms
+
+99.9% CPU use with 8 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -2961486.47023     -2961486.47023     -2961486.47023
+  Force two-norm initial, final = 0.500041 0.500041
+  Force max component initial, final = 0.48999 0.48999
+  Final line search alpha, max atom move = 4.98256e-08 2.44141e-08
+  Iterations, force evaluations = 1 25
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 88.433     | 93.386     | 97.986     |  30.9 |  7.81
+Bond    | 2.5316     | 2.757      | 2.9034     |   6.0 |  0.23
+Kspace  | 813.16     | 817.79     | 822.99     |  10.7 | 68.35
+Neigh   | 2.6294     | 2.6331     | 2.6371     |   0.2 |  0.22
+Comm    | 0.55384    | 0.56414    | 0.58446    |   1.2 |  0.05
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.0032949  | 0.0040128  | 0.0050123  |   1.0 |  0.00
+Other   |            | 279.3      |            |       | 23.34
+
+Nlocal:    40960 ave 43256 max 39392 min
+Histogram: 2 1 0 1 1 1 1 0 0 1
+Nghost:    83879 ave 85447 max 81583 min
+Histogram: 1 0 0 1 1 1 1 0 1 2
+Neighs:    3.77819e+07 ave 3.99151e+07 max 3.63353e+07 min
+Histogram: 2 1 0 1 1 1 1 0 0 1
+
+Total # of neighbors = 302255412
+Ave neighs/atom = 922.41
+Ave special neighs/atom = 4
+Neighbor list builds = 1
+Dangerous builds = 0
+
+
+variable lengthx equal "lx"
+variable lengthy equal "ly"
+variable lengthz equal "lz"
+
+print "a= ${lengthx};"
+a= 204.095993042;
+print "b= ${lengthy};"
+b= 176.747131348;
+print "c= ${lengthz};"
+c= 103.797028492748;
+Total wall time: 3:14:16

@@ -1,0 +1,6 @@
+Using 8  cores took Config 1 04:36:47 for 141 steps on default.
+Using 16 cores took Config 2 01:20:35 for 137 steps on default.
+Using 24 cores took Config 3 00:49:11 for 131 steps on default.
+Using 32 cores took Config 4 01:30:35 for 131 steps on default.
+Using 40 cores took Config 5 YYY      for x   steps on default.
+Using 48 cores took Config 6 YYY      for x   steps on default.

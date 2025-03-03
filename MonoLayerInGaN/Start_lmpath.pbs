@@ -1,0 +1,33 @@
+#!/bin/bash
+#PBS -r n
+#PBS -m bea
+#PBS -M daniel.tanner@tyndall.ie
+#PBS -M stefan.schulz@tyndall.ie
+#PBS -N 2p5_NoWWF_7-25
+#PBS -q default
+#PBS -l nodes=1:ppn=48
+##PBS -l walltime=800:05:00.00
+
+export PATH=$PATH:/sfihome/daniel.tanner/lammps-16Feb16/src
+export PATH=$PATH:/sfihome/local/pgi1510/linux86-64/2015/mpi/mpich/bin
+export PATH=$PATH:/sfihome/local/pgi1510/linux86-64/2015/mpi/mpich/lib
+
+#--------------------------------
+NP=`wc -l ${PBS_NODEFILE}`
+#-------------------------------
+#  MPI run command:
+#------------------------------
+
+echo cpus: $NP
+echo nodes: `cat ${PBS_NODEFILE}`
+echo $PATH
+
+cd ${PBS_O_WORKDIR}
+
+for i in `seq 7 25`
+do
+   cd RC_${i}/Supercell
+   /sfihome/local/pgi1510/linux86-64/2015/mpi/mpich/bin/mpirun -np 48 -machinefile ${PBS_NODEFILE} lmp_pgi < ../../in.pppm > NewLammps.txt
+   ../../Posish log.lammps supercell_corr2.dat dump.lammps > PositionsOutput.txt
+   cd ../../
+done

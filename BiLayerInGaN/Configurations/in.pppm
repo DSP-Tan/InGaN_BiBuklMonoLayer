@@ -1,0 +1,59 @@
+# Initialize:
+
+clear
+units metal
+dimension 3
+boundary p p p
+atom_style full
+
+angle_style class2
+bond_style class2
+
+# Read the atom positions from data file
+read_data data.lammps
+
+neighbor 2.1 bin
+#neigh_modify once yes
+#neigh_modify delay 10 check yes
+#neigh_modify binsize 10
+#neigh_modify binsize 6
+
+#atom_modify sort 100 10
+
+special_bonds lj/coul 1.0 1.0 1.0
+pair_style coul/long 15
+pair_coeff * *
+pair_modify table 0
+kspace_style pppm 1e-8
+
+dump     1    all  custom 10000 dump.lammps   id   x      y      z
+dump_modify 1 format "%6d %11.6lf %11.6lf %11.6lf"
+restart 10000 large*.restart
+
+group corner id 1
+fix cornerfix corner setforce 0.0 0.0 0.0
+thermo_style custom step pe ebond epair eangle 
+
+min_modify line quadratic
+min_style cg
+
+
+#Relax only atomic positions with low tolerance
+minimize 1e-12 1e-12 5000000 100000
+
+#Relax with fix box relax and higher tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0
+minimize 1e-25 1e-25 5000000 100000
+ 
+#Relax with with nreset and high tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0 nreset 100
+minimize 1e-25 1e-25 5000000 100000
+
+
+variable lengthx equal "lx"
+variable lengthy equal "ly"
+variable lengthz equal "lz"
+
+print "a= ${lengthx};"
+print "b= ${lengthy};"
+print "c= ${lengthz};"

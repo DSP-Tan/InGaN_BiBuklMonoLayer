@@ -1,0 +1,7 @@
+Seed = 20
+Indium Content = 25
+well starts at nz = 1
+well ends at nz = 40
+wwf is false
+well width fluctuation starts at  = 0
+well width fluctuation ends at = 0

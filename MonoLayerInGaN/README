@@ -1,0 +1,38 @@
+Small Tall Cell is a folder which contains a supercell which is:
+
+n1 = 2;  
+n2 = 2;
+n3 = 40;
+
+at layer n3 = 32, there is one indium atom. With 4 cations present in this layerthis makes a 25% layer. This cell was made to 
+test supercell size effects and give insight into other DFT results.
+
+Small Small Cell is a folder which contains a supercell which is:
+
+n1 = 2;
+n2 = 2;
+n3 = 20;
+
+This directory is to now test vertical localisation of the electron wave function. In our TB calculations we 
+get the electron localised to the monolayer. But some dft calculations do not get this, they get the electron 
+wave funciton spread out. Thus we here lower the vertical extent of our supercell to see if supercell size effects 
+delocalise our electron. If this happens then we know the DFT results are bad due to out of plane delocalisation 
+caused by insufficiently large supercell.
+
+In configurations, we have monolayer 25% supercells of size 64,64,40 with no WWF
+Seed = Config number
+Indium Content = 25
+well starts at nz = 32
+well ends at nz = 32
+wwf is false
+well width fluctuation starts at  = 0
+well width fluctuation ends at = 0
+
+In configurations_Withwwfs we have 25% supercells of size 64,64,40:
+Seed = Config Number
+Indium Content = 25
+well starts at nz = 32
+well ends at nz = 32
+wwf is true
+well width fluctuation starts at  = 31
+well width fluctuation ends at = 31
