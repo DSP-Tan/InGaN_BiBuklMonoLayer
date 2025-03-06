@@ -1,7 +1,9 @@
 #!/bin/bash
 
-FC=gfortran
-Fflags="-O2"
+#FC=ifx
+#Fflags"-Ofast"
+FC=gfortran   
+Fflags="-O2"  
 
 # This is a wrapper around the fortran files contained in this repository which allows us to avoid
 # dealing with any fotran syntax.
@@ -70,6 +72,7 @@ sed -i -e '10s-parameter(n2=2)-parameter(n2='$N2')-g' supercellsub_seed_${Seed}.
 sed -i -e '11s-parameter(n3=2)-parameter(n3='$N3')-g' supercellsub_seed_${Seed}.f
 sed -i -e '58s-idum=2-idum='${Seed}'-g' supercellsub_seed_${Seed}.f
 ${FC} -o supercellsub.out supercellsub_seed_${Seed}.f ${Fflags}
+echo "Creating substrate atoms"
 ./supercellsub.out
 
 cp supercell.dat sc_GaN.dat; rm supercell.dat
@@ -89,6 +92,7 @@ if [ $Indium == "100" ]
   fi
 
 ${FC} -o supercellwell.out supercellwell_seed_${Seed}.f ${Fflags}
+echo "Creating QW atoms"
 ./supercellwell.out
 
 cp supercell.dat sc_InGaN.dat; rm supercell.dat
@@ -106,6 +110,7 @@ sed -i '17s-parameter(n1=2)-parameter(n1='$N1')-g'        composite_seed_${Seed}
 sed -i '18s-parameter(n2=2)-parameter(n2='$N2')-g'        composite_seed_${Seed}.f90
 sed -i '19s-parameter(n3=2)-parameter(n3='$N3')-g'        composite_seed_${Seed}.f90
 ${FC} -o composite.out composite_seed_${Seed}.f90 ${Fflags}
+echo "Combining substrate and QW"
 ./composite.out
 
 # Then run sc_nitrogen_label.f this labels the nitrogen atoms according to their environments, so that they are assigned the correct effective charges.
