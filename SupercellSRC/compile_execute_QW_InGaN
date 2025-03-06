@@ -1,51 +1,58 @@
 #!/bin/bash
 
-#This program takes the well width and well width fluctuation (wwf) paramters and creates supercells ready to
-#be input into the Gulp to lammps program.
-#The first argument is the random number seed.
-#These are 64, 64, 40 shell supercells with  Indium contents specified in the variable ${Indium}
+# This is a wrapper around the fortran files contained in this repository which allows us to avoid
+# dealing with any fotran syntax.
 
-#This script is to remain in the Supercell directory. It can be called
-#from other directories. The script may not work if the .f files are changed,
-#since the positions of the substitutions are hardcoded.
+# The program takes 10 arguments:
+# The cell dimensions n1, n2, n3
+# The random seed, {Seed} for the indium distribution random number generator
+# The indium content as a percentage {Indium}
+# The starting point in z for the quantum well, given as a layer number n3
+# The ending point in z for the quantum well.
+# A boolean to say w hether or not there will be a WWF
+# The starting point of the WWF
+# The end of the WWF
 
-N1=64
-N2=64
-N3=40
-
+# This script is to remain in the Supercell directory. It can be called
+# from other directories. The script may not work if the .f files are changed,
+# since the positions of the substitutions are hardcoded.
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"   ## This gives the location of where this script is. 
 # It will work as long as the last component of the path used to find the script is not a symlink (directory links are OK). 
 # If you also want to resolve any links to the script itself, you need a multi-line 
 # solution... see: http://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
 
-if [ $# -lt 7 ]; then
+if [ $# -lt 10 ]; then
   echo 'The arguments to this script are:'
-  echo '{Seed} {IndiumContent(%)} {wellstart} {wellend} {wwf: true or false}  {wwfstart} {wwfend}'
+  echo '{n1} {n2} {n3} {Seed} {IndiumContent(%)} {wellstart} {wellend} {wwf: true or false}  {wwfstart} {wwfend}'
   echo 1>&2 "$0: not enough arguments"
   exit 2
-elif [ $# -gt 7 ]; then
+elif [ $# -gt 10 ]; then
   echo 'The arguments to this script are:'
-  echo "{Seed} {IndiumContent(%)} {wellstart} {wellend} {wwf: true or false} {wwfstart} {wwfend}"
+  echo '{n1} {n2} {n3} {Seed} {IndiumContent(%)} {wellstart} {wellend} {wwf: true or false}  {wwfstart} {wwfend}'
   echo 1>&2 "$0: too many arguments"
   exit 2
 fi
 
-Seed=$1
-Indium=$2
-wellstart=$3
-wellend=$4
-wwf=$5
-wwfstart=$6
-wwfend=$7
+N1=$1
+N2=$2
+N3=$3
+Seed=$4
+Indium=$5
+wellstart=$6
+wellend=$7
+wwf=$8
+wwfstart=$9
+wwfend=${10}
 
-echo "Seed = ${Seed}" > Compile_Exec.txt
-echo "Indium Content = ${Indium}" >> Compile_Exec.txt
-echo "well starts at nz = ${wellstart}" >> Compile_Exec.txt
-echo "well ends at nz = ${wellend}" >> Compile_Exec.txt
-echo "wwf is ${wwf}" >> Compile_Exec.txt
+echo "(n1,n2,n3) = ($N1,$N2,$N3)"                      >  Compile_Exec.txt
+echo "Seed = ${Seed}"                                  >> Compile_Exec.txt
+echo "Indium Content = ${Indium}"                      >> Compile_Exec.txt
+echo "well starts at nz = ${wellstart}"                >> Compile_Exec.txt
+echo "well ends at nz = ${wellend}"                    >> Compile_Exec.txt
+echo "wwf is ${wwf}"                                   >> Compile_Exec.txt
 echo "well width fluctuation starts at  = ${wwfstart}" >> Compile_Exec.txt
-echo "well width fluctuation ends at = ${wwfend}" >> Compile_Exec.txt
+echo "well width fluctuation ends at    = ${wwfend}"   >> Compile_Exec.txt
 
 #You should specify the lines of these relacements.
 
@@ -102,11 +109,13 @@ gfortran -o composite.out composite_seed_${Seed}.f90
 
 sed -e '27s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$N1',n2='$N2',n3='$N3')-g' $DIR/sc_nitrogen_label.f > sc_nitrogen_label_seed_${Seed}.f
 gfortran -o sc_nitrogen_label.out sc_nitrogen_label_seed_${Seed}.f
+echo "Labelling nitrogen atoms"
 ./sc_nitrogen_label.out
 
 # Then layer_label.f. This labels whether the atoms are in the upper or lower layers, to artificially for the non-ideal c/a ratio.
 sed -e '10s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$N1',n2='$N2',n3='$N3')-g' $DIR/layer_label.f > layer_label_seed_${Seed}.f
 gfortran -o layer_label.out layer_label_seed_${Seed}.f
+echo "Labelling atom layers"
 ./layer_label.out
 
 sed -i -e '1,3s/^[ \t]*//' supercell_corr2.dat
