@@ -26,7 +26,7 @@ gcloud compute instances create $name \
 --provisioning-model=STANDARD \
 --service-account=791114692313-compute@developer.gserviceaccount.com \
 --scopes=https://www.googleapis.com/auth/cloud-platform \
---create-disk=auto-delete=yes,boot=yes,device-name=big-money-vm,image=projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20240904,mode=rw,size=${bootDiskSize},type=pd-balanced \
+--create-disk=auto-delete=yes,boot=yes,device-name=big-money-vm,image=projects/ubuntu-os-cloud/global/images/ubuntu-2204-jammy-v20250305,mode=rw,size=${bootDiskSize},type=pd-balanced \
 --no-shielded-secure-boot \
 --shielded-vtpm \
 --shielded-integrity-monitoring \
@@ -41,7 +41,10 @@ gcloud compute instances create $name \
 #--network-interface=address=${externalIp},network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=default \
 
 # Here is how to see how the startup script run went:
+# From your local computer: 
 # gcloud compute instances get-serial-port-output big-money-vm --zone=europe-west1-d
-#
-# gcloud compute instances get-serial-port-output test1-money-vm --zone=europe-west1-d \
-# | grep startup-script | sed 's/^.*startup-script: //' > testMoneySerial.txt
+# Or while connected to the VM:
+# sudo journalctl -u google-startup-scripts.service
+
+# gcloud compute instances get-serial-port-output $name --zone=europe-west1-d | grep startup-script | sed 's/^.*startup-script: //' #> testMoneySerial.txt
+
