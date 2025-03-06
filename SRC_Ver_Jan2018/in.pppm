@@ -1,0 +1,83 @@
+# Initialize:
+
+clear            #This clears all variables
+units metal      #These units are Angstrom, eV, ps, bars etc. see: http://lammps.sandia.gov/doc/units.html
+dimension 3      #3 dimensional
+boundary p p p   #This specifies the boundary type at the endges of the cell as defined in data.lammps. For periodic boundary conditions it is best to have a rectangular cell.
+atom_style full  #This is an atom style where both molecular and charge peroperties are specified. This command will dicate how the atomic information is entered in the data file.
+                 #it is a waste of memory and inefficient to have a style which specifies more information than you need. So, if you were using a VFF without charge for example,
+                 #"atom_style angle" may be more efficient. See the data file, and: http://lammps.sandia.gov/doc/atom_style.html
+
+
+#The commands below set the angular and bond interaction terms. Two things should be noted about the "class2" package
+#1.These are  not within the default lammps installation.
+#  Check these are installed by inputting make ps, which should give: 
+#  Installed YES: package CLASS2
+#    src/bond_class2.cpp and CLASS2/bond_class2.cpp are different
+#  amongst information about all other packages.
+#
+#2.bond_style class2 has been modified to include the linear repulsive term of Martin's potential. This is why the command above informs us that the original "CLASS2/bond_class2.cpp" and the one
+#with which lammps is compiled are different.
+
+angle_style class2 # This is the lammps angle_style which allows for bond/angle interactions and bond/bond interactions, as well as 3rd and 4th order angle terms. http://lammps.sandia.gov/doc/angle_class2.html
+bond_style class2  # This is the lammps bond_style which allows for higher order bond terms. However, the source code for this interaction has been changed in order to incorporate the linear repulsive term
+                   # which is needed to keep the crystal stable. This changed code can be found in the lammps src folder. It's bond_class2.cpp
+
+# Read the atom positions from data file
+read_data data.lammps  # What will be in this data file depends on the types of potentials and types of atoms. See the preprocessing code, 
+                       # the data.lammps file itself, and: http://lammps.sandia.gov/doc/read_data.html. 
+                       # The data file for miguel's potential contains: cell parameters, atomic charges, positions, types and ids.
+                       # List of bond pairs
+                       # List of angle triplets
+                       # Vff potential data for all bond pairs and all angle triplets, which will depend on which atom types are in the bonds/angles
+
+neighbor 2.1 bin       # This means that the neighbour list for a particular atom will include all atoms within the greatest force cutoff distance, plus the "skin distance" of 2.1. 
+                       # The default is 2.0. This is not reallly a necessary change. It was just made during some test some time.
+                       # http://lammps.sandia.gov/doc/neighbor.html
+
+special_bonds lj/coul 1.0 1.0 1.0 # This ensures that there is no screening of the coulomb interaction between bonded atom pairs. This "screening" is effectively done with the linear repulsive term.
+pair_style coul/long 15           # The 15 here is the real space cutoff for the calculation of coulombic interactions. The longer this is the faster the calculation but lots of memory needs to be used
+                                  # because of the very long neighbour lists. This has been played with to get a good speed.
+pair_coeff * *                    # Since this is the coulomb interaction no pair coefficients beyond those specified in the data file are needed. The * * are some sort of shortcuts terms.
+pair_modify table 0               # This setting is reccommended for greatest accuracy of the force evaluations. 0 means no tabulation approximation is made. 
+                                  # This is where a table of the coulomb forces and energies is made before calculation and then these tabulated values are interpolated between and this is quicker
+                                  # than directly evaluating the coulomb interaction every time.
+
+kspace_style pppm 1e-8            # This is the fastest way to compute the coulombic forces. The 1e-8 specifies the accuracy, and this was checked against other ewald calculation methods to be accurate and fast.
+
+dump     1    all  custom 10000 dump.lammps   id   x      y      z   #This specifies what quantities are written to the dump.lammps file, and how often. 
+                                                                     #The command means that every 10000 steps the id and x,y,z positions of all atoms are printed to a file.
+dump_modify 1 format "%6d %11.6lf %11.6lf %11.6lf"
+restart 10000 large*.restart                                         #This means a restart file is written every 10000 steps. These restart files should be deleted if the relaxation worked as they are large.
+
+group corner id 1                                                    #This designates the corner atom as atom 1. This is the atom which will be held fixed.
+fix cornerfix corner setforce 0.0 0.0 0.0                            #This fixes the corner atom in place.
+thermo_style custom step pe ebond epair eangle                       #This specifies what is written in the log.lammps file. 
+                                                                     #It prints the step, the potential energy, the bond energy, the pair energy and angle energy
+
+min_modify line quadratic                                            #The quadratic style is reccommended as the best linesearch style to get a low minimisation
+min_style cg                                                         #min_style cg means use conjugate gradient minimisation
+
+#Relaxing in this three step method results in quicker relaxations which get to lower energies. It also
+#solved the problem of certain supercells which would get "stuck" whilst relaxing and relax with some large forces.
+#This method was reccommended in lammps documentation somewhere and has turned out very well in actual relaxations.
+
+#Relax only atomic positions with low tolerance
+minimize 1e-12 1e-12 5000000 100000
+
+#Relax with fix box relax and higher tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0      # This is a relaxation in the z-direction only. If all directions were to be relaxed independently, it would look like x 0 y 0 z 0;
+minimize 1e-25 1e-25 5000000 100000               # fixed point refers to which point of the cell is kept fixed during the box relaxation.
+ 
+#Relax with with nreset and high tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0 nreset 100
+minimize 1e-25 1e-25 5000000 100000
+
+
+variable lengthx equal "lx"
+variable lengthy equal "ly"
+variable lengthz equal "lz"
+
+print "a= ${lengthx};"
+print "b= ${lengthy};"
+print "c= ${lengthz};"
