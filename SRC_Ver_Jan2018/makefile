@@ -1,10 +1,10 @@
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -O2
 objects = BondsTwoChecks.o makebonds.o AtomTypes.o SkipToCommand.o angles.o
 all: mai
 
 mai: $(objects)
-	$(CC) $(CFLAGS) -O2 -o mai $(objects) -lm
+	$(CC) $(CFLAGS) -o mai $(objects) -lm
 
 BondsTwoChecks.o: BondsTwoChecks.c funcs.h
 	$(CC) $(CFLAGS) -c BondsTwoChecks.c
