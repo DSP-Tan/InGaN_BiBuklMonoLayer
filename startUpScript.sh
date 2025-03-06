@@ -18,7 +18,7 @@ echo -e "\n\n\n"
 ################################################################################
 ############ Git, other command line utilities ############################
 ################################################################################
-echo "Git, other command line utilities"
+echo "Start apt-get and apt install"
 
 apt update
 sudo apt-get upgrade
@@ -29,7 +29,8 @@ libblas-dev liblapack-dev pkg-config ffmpeg python3-dev
 sudo apt-get install python3-pip python3.10-venv python3-venv
 sudo apt update
 
-# Intel compiler installation from https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit-download.html?packages=hpc-toolkit&hpc-toolkit-os=linux&hpc-toolkit-lin=apt
+# Intel compiler installation from: 
+# https://www.intel.com/content/www/us/en/developer/tools/oneapi/hpc-toolkit-download.html?packages=hpc-toolkit&hpc-toolkit-os=linux&hpc-toolkit-lin=apt
 # download the key to system keyring
 
 su - $user -s /bin/bash <<EOF
@@ -44,13 +45,6 @@ sudo apt update
 sudo apt install intel-oneapi-hpc-toolkit --assume-yes
 EOF
 
-# Intell basekit installation
-# wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-# sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-# sudo sh -c 'echo deb https://apt.repos.intel.com/oneapi all main > /etc/apt/sources.list.d/oneAPI.list'
-# 
-# sudo apt-get update
-# sudo apt-get install intel-basekit --assume-yes
 
 echo 'source /opt/intel/oneapi/setvars.sh'                                              >> /home/${user}/.bashrc
 echo 'export PATH=/opt/intel/oneapi/mkl/2024.0:$PATH'                                   >> /home/${user}/.bashrc
@@ -59,17 +53,18 @@ echo 'export LD_LIBRARY_PATH=/opt/intel/oneapi/compiler/2024.0/lib:$LD_LIBRARY_P
 
 source /home/${user}/.bashrc
 
-git clone -b stable_29Aug2024 https://github.com/lammps/lammps.git /home/${user}/lammps_intel
+git clone -b stable_29Aug2024 --depth 1 https://github.com/lammps/lammps.git /home/${user}/lammps_intel
 
 cd /home/${user}/lammps_intel
 mkdir -p build
 cd       build
 
+echo -e "\n\n\n\n"
 echo "Running cmake command"
+echo -e "\n\n\n\n"
 su - $user -s /bin/bash <<EOF
 source /home/${user}/.bashrc
 cd /home/${user}/lammps_intel/build
-pwd
 cmake \
         -D PKG_PYTHON=ON \
         -D PKG_OPENMP=ON \
