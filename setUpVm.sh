@@ -5,7 +5,7 @@
 # made. you should then see two ssh keys.
 
 #name=small-money-vm
-name=test-money-vm
+name=test1-money-vm
 #machine=e2-standard-4           # This is what le wagon says in setup.
 machine=e2-standard-4
 #machine=e2-highcpu-8
@@ -43,4 +43,5 @@ gcloud compute instances create $name \
 # Here is how to see how the startup script run went:
 # gcloud compute instances get-serial-port-output big-money-vm --zone=europe-west1-d
 #
-# gcloud compute instances get-serial-port-output test-money-vm --zone=europe-west1-d | grep startup-script > testMoneySerial.txt
+# gcloud compute instances get-serial-port-output test1-money-vm --zone=europe-west1-d \
+# | grep startup-script | sed 's/^.*startup-script: //' > testMoneySerial.txt
