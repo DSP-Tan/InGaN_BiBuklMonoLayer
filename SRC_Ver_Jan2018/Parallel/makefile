@@ -1,5 +1,7 @@
-CC = gcc
-CFLAGS = -Wall -fopenmp -O2
+#CC = gcc
+#CFLAGS = -Wall -fopenmp -O2
+CC = icx
+CFLAGS = -Wall -qopenmp -Ofast
 objects = BondsTwoChecks.o makebonds.o AtomTypes.o SkipToCommand.o angles.o
 all: mai
 
