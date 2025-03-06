@@ -26,7 +26,7 @@ echo $PATH
 
 cd ${PBS_O_WORKDIR}
 
-../../SupercellSRC/compile_execute_QW_InGaN 20 25 32 32 0 0
+../../SupercellSRC/compile_execute_QW_InGaN 64 64 40 20 25 32 32 0 0
 /sfihome/daniel.tanner/GulpToLammpsSRC/SRC_Ver_Jun2016/mai supercell_corr2.dat /sfihome/daniel.tanner/GulpToLammpsSRC/SRC_Ver_Jun2016/Pots > mai.txt
 
 

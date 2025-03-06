@@ -3,9 +3,8 @@
 
 for i in `seq 1 4`
 do 
-   #mkdir Config${i}
+   mkdir -p Config${i}
    cd Config${i}
-   cp ../Pots .
    #sed -e 's_XXX_'${i}'_g' ../PreProc.pbs > PreProc.pbs
    sed -e 's_XXX_'${i}'_g' ../Start_lmpath.pbs > Start_lmpath.pbs
    #qsub PreProc.pbs

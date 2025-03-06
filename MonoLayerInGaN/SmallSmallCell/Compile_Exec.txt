@@ -1,3 +1,4 @@
+(n1,n2,n3) = (2,2,20)
 Seed = 3
 Indium Content = 45
 well starts at nz = 10
