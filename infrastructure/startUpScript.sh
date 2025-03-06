@@ -104,7 +104,7 @@ echo 'export PATH=/home/'${user}'/lammps_intel/build:$PATH'     >> /home/${user}
 echo -e "\n\n\n--------------------------------------------------------------------------"
 echo "Clone InGaN repo and compile codes"
 echo -e "--------------------------------------------------------------------------\n\n\n"
-git clone git@github.com:DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/
+git clone git@github.com:DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/InGaN
 
 # Note, to run these newer versions of lammps you must execute like this: 
 # export OMP_NUM_THREADS=8

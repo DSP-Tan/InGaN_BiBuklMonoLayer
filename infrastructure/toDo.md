@@ -14,3 +14,7 @@ gcloud compute ssh USER@INSTANCE --command "bash -s" < installIntelCompiler.sh
 sleep || script which waits for intel installtion  script to end
 gcloud compute ssh USER@INSTANCE --command "bash -s" < script.sh
 
+
+- Make a .env file and a .env sample file where we input the service account name
+  we want and other things like this. Or else just replace the values in the scripts
+  with environment variables.

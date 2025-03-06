@@ -53,3 +53,10 @@
 
 # All these commands could be executed just at the end of setUpVm.sh. After an appropriate sleep time
 # to give it a chance to start up.
+
+It is probably not so safe to be doing all these "assume-yes" and git clonings as root on the vm.
+Probably it would be a good idea to ensure that the default vm service account cannot create other
+vms or do some other harmful things.
+
+For this reason it's a good idea to hide the names of your service accounts as well in the github
+page.
