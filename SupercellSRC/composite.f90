@@ -118,5 +118,4 @@ program composite
   close(50)
   close(60)
   
-  return 
 end
