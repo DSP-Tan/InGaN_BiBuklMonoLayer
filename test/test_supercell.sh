@@ -11,4 +11,8 @@ do
       echo "Test $i passed."
   fi
 done
+
+#echo "Cleaning test folder."
+rm  *_seed*.f* Compile_Exec.txt *.dat
+
 cd ..
