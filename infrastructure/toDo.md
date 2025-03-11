@@ -1,3 +1,4 @@
+# Splitting startup script
 Because gcp startup scripts are all executed as root, or perhaps because certain 
 services need to be restarted during the course of the installation of the intel
 compiler suite and then lammps, cmake does not work at the end of the full startup
@@ -14,7 +15,19 @@ gcloud compute ssh USER@INSTANCE --command "bash -s" < installIntelCompiler.sh
 sleep || script which waits for intel installtion  script to end
 gcloud compute ssh USER@INSTANCE --command "bash -s" < script.sh
 
+**Turns out this was not necessary, startupScript.sh works fine if appropriate chowns are made**.
 
-- Make a .env file and a .env sample file where we input the service account name
+# Separate and hide configuration
+- Make a .env file and a .env_sample file where we input the service account name
   we want and other things like this. Or else just replace the values in the scripts
   with environment variables.
+
+# setUp specific IAM profile
+
+We do not need the full editor permissions that come with the default compute engine service
+account. All we need really is to be able to copy things from gcs, and perhaps then just 
+view some other things. So a "viewer" permission, along with copy from gcs rights should be
+enough.
+
+The setup of this profile can be done in the setUpVm.sh script with a gcloud command. You would
+make it first in the UI and then just do "get equivalent code".
