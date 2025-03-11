@@ -60,14 +60,15 @@ For this reason it's a good idea to hide the names of your service accounts as w
 page.
 
 # Supercell code
-You do not need two "supercell.f" supercell_sub and supercell_well to be stored. They are the same
-code except for the indium content, so just have the compile_execute change just these parts.
-
-The x-y location of the wwf needs to be set. This is what explains the difference between the 
-energies you calculated and those calculated in the old greengap code. Just do a diff on the composite.f
-codes contained in the Config one of the green 5% and you will see it. It seems your central wwf
-position was set to the value it would have for the large mono/biylayers.
-
 Remember that in Cluster/GulpToLammpses there are more updated versions of the code than that contained
 in SRC_Ver_Jan I tihnk it's something to do with using qsort rather than bubble sort, or just 
 saying as much. Anyway you can copy over these changes.
+
+We need to test the energies produced by the scripts on the 5% InGaN green gap calculations.
+
+# Testing
+
+We will first implement the testing framework for the supercell code using git worktree. Then do the 
+same thing for GulpToLammps. Eventually we will also test the lammps installation to make sure we are
+getting the same initial energies. For that we can only just save the output of a log.lammps and test
+the first energy, and then run a code which will compare the final positions.
