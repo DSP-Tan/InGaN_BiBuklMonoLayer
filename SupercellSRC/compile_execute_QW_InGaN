@@ -39,9 +39,9 @@ elif [ $# -gt 10 ]; then
   exit 2
 fi
 
-N1=$1
-N2=$2
-N3=$3
+n1=$1
+n2=$2
+n3=$3
 Seed=$4
 Indium=$5
 wellstart=$6
@@ -50,14 +50,18 @@ wwf=$8
 wwfstart=$9
 wwfend=${10}
 
-echo "(n1,n2,n3) = ($N1,$N2,$N3)"                      >  Compile_Exec.txt
+diskcenter=$(echo $n1/2+0.5 | bc -l | xargs printf "%.1f")
+
+echo "(n1,n2,n3) = ($n1,$n2,$n3)"                      >  Compile_Exec.txt
 echo "Seed = ${Seed}"                                  >> Compile_Exec.txt
 echo "Indium Content = ${Indium}"                      >> Compile_Exec.txt
 echo "well starts at nz = ${wellstart}"                >> Compile_Exec.txt
 echo "well ends at nz = ${wellend}"                    >> Compile_Exec.txt
 echo "wwf is ${wwf}"                                   >> Compile_Exec.txt
+echo "wwf is centred at (${diskcenter},${diskcenter})" >> Compile_Exec.txt
 echo "well width fluctuation starts at  = ${wwfstart}" >> Compile_Exec.txt
 echo "well width fluctuation ends at    = ${wwfend}"   >> Compile_Exec.txt
+echo "${DIR}/$(basename $0) ${n1} ${n2} ${n3} ${Seed} ${Indium} ${wellstart} ${wellend} ${wwf}  ${wwfstart} ${wwfend}" >> Compile_Exec.txt
 
 #You should specify the lines of these relacements.
 
@@ -67,9 +71,9 @@ echo "well width fluctuation ends at    = ${wwfend}"   >> Compile_Exec.txt
 
 #First make the sc_GaN.dat using supercellsub.f. This is pure GaN.
 
-sed -e '9s-parameter(n1=2)-parameter(n1='$N1')-g'  $DIR/supercellsub.f > supercellsub_seed_${Seed}.f
-sed -i -e '10s-parameter(n2=2)-parameter(n2='$N2')-g' supercellsub_seed_${Seed}.f
-sed -i -e '11s-parameter(n3=2)-parameter(n3='$N3')-g' supercellsub_seed_${Seed}.f
+sed -e '9s-parameter(n1=2)-parameter(n1='$n1')-g'  $DIR/supercellsub.f > supercellsub_seed_${Seed}.f
+sed -i -e '10s-parameter(n2=2)-parameter(n2='$n2')-g' supercellsub_seed_${Seed}.f
+sed -i -e '11s-parameter(n3=2)-parameter(n3='$n3')-g' supercellsub_seed_${Seed}.f
 sed -i -e '58s-idum=2-idum='${Seed}'-g' supercellsub_seed_${Seed}.f
 ${FC} -o supercellsub.out supercellsub_seed_${Seed}.f ${Fflags}
 echo "Creating substrate atoms"
@@ -79,9 +83,9 @@ cp supercell.dat sc_GaN.dat; rm supercell.dat
 
 #Then make the sc_InGaN.dat using supercellwell.f. This is Indium InxGa1-xN; where x = ${Indium}
 
-sed -e '9s-parameter(n1=2)-parameter(n1='$N1')-g'  $DIR/supercellwell.f > supercellwell_seed_${Seed}.f
-sed -i -e '10s-parameter(n2=2)-parameter(n2='$N2')-g' supercellwell_seed_${Seed}.f
-sed -i -e '11s-parameter(n3=2)-parameter(n3='$N3')-g' supercellwell_seed_${Seed}.f
+sed -e '9s-parameter(n1=2)-parameter(n1='$n1')-g'  $DIR/supercellwell.f > supercellwell_seed_${Seed}.f
+sed -i -e '10s-parameter(n2=2)-parameter(n2='$n2')-g' supercellwell_seed_${Seed}.f
+sed -i -e '11s-parameter(n3=2)-parameter(n3='$n3')-g' supercellwell_seed_${Seed}.f
 sed -i -e '58s-idum=2-idum='${Seed}'-g' supercellwell_seed_${Seed}.f
 
 if [ $Indium == "100" ]
@@ -100,28 +104,29 @@ cp supercell.dat sc_InGaN.dat; rm supercell.dat
 
 #Then run composite.f90 with the correct wwf parameters. well start, well end, wwf start, wwf end
 
-sed    '23s/ifinal=2/ifinal='$N1'/g' $DIR/composite.f90 > composite_seed_${Seed}.f90
+sed    '23s/ifinal=2/ifinal='$n1'/g' $DIR/composite.f90 > composite_seed_${Seed}.f90
 sed -i 's/kstart=18/kstart='${wellstart}'/g'              composite_seed_${Seed}.f90
 sed -i 's/kfinal=22/kfinal='${wellend}'/g'                composite_seed_${Seed}.f90
 sed -i 's/disk = .true./disk = .'${wwf}'./g'              composite_seed_${Seed}.f90
 sed -i 's/diskstart = 23/diskstart = '${wwfstart}'/g'     composite_seed_${Seed}.f90
 sed -i 's/diskfinal = 24/diskfinal = '${wwfend}'/g'       composite_seed_${Seed}.f90
-sed -i '17s-parameter(n1=2)-parameter(n1='$N1')-g'        composite_seed_${Seed}.f90
-sed -i '18s-parameter(n2=2)-parameter(n2='$N2')-g'        composite_seed_${Seed}.f90
-sed -i '19s-parameter(n3=2)-parameter(n3='$N3')-g'        composite_seed_${Seed}.f90
+sed -i '/diskcenter/s/32\.5/'${diskcenter}'/g'            composite_seed_${Seed}.f90
+sed -i '17s-parameter(n1=2)-parameter(n1='$n1')-g'        composite_seed_${Seed}.f90
+sed -i '18s-parameter(n2=2)-parameter(n2='$n2')-g'        composite_seed_${Seed}.f90
+sed -i '19s-parameter(n3=2)-parameter(n3='$n3')-g'        composite_seed_${Seed}.f90
 ${FC} -o composite.out composite_seed_${Seed}.f90 ${Fflags}
 echo "Combining substrate and QW"
 ./composite.out
 
 # Then run sc_nitrogen_label.f this labels the nitrogen atoms according to their environments, so that they are assigned the correct effective charges.
 
-sed -e '27s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$N1',n2='$N2',n3='$N3')-g' $DIR/sc_nitrogen_label.f > sc_nitrogen_label_seed_${Seed}.f
+sed -e '27s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$n1',n2='$n2',n3='$n3')-g' $DIR/sc_nitrogen_label.f > sc_nitrogen_label_seed_${Seed}.f
 ${FC} -o sc_nitrogen_label.out sc_nitrogen_label_seed_${Seed}.f ${Fflags}
 echo "Labelling nitrogen atoms"
 ./sc_nitrogen_label.out
 
 # Then layer_label.f. This labels whether the atoms are in the upper or lower layers, to artificially for the non-ideal c/a ratio.
-sed -e '10s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$N1',n2='$N2',n3='$N3')-g' $DIR/layer_label.f > layer_label_seed_${Seed}.f
+sed -e '10s-parameter(n1=2,n2=2,n3=2)-parameter(n1='$n1',n2='$n2',n3='$n3')-g' $DIR/layer_label.f > layer_label_seed_${Seed}.f
 ${FC} -o layer_label.out layer_label_seed_${Seed}.f ${Fflags}
 echo "Labelling atom layers"
 ./layer_label.out
