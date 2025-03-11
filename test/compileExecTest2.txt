@@ -1,0 +1,10 @@
+(n1,n2,n3) = (12,12,40)
+Seed = 2
+Indium Content = 05
+well starts at nz = 21
+well ends at nz = 32
+wwf is true
+wwf is centred at (6.5,6.5)
+well width fluctuation starts at  = 19
+well width fluctuation ends at    = 20
+/home/daniel/tyndall-work/InGaN_BiBuklMonoLayer/SupercellSRC/compile_execute_QW_InGaN 12 12 40 2 05 21 32 true  19 20
