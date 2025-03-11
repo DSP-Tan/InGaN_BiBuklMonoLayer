@@ -83,16 +83,16 @@ cp supercell.dat sc_GaN.dat; rm supercell.dat
 
 #Then make the sc_InGaN.dat using supercellwell.f. This is Indium InxGa1-xN; where x = ${Indium}
 
-sed -e '9s-parameter(n1=2)-parameter(n1='$n1')-g'  $DIR/supercellwell.f > supercellwell_seed_${Seed}.f
+sed -e '9s-parameter(n1=2)-parameter(n1='$n1')-g'  $DIR/supercellsub.f > supercellwell_seed_${Seed}.f
 sed -i -e '10s-parameter(n2=2)-parameter(n2='$n2')-g' supercellwell_seed_${Seed}.f
 sed -i -e '11s-parameter(n3=2)-parameter(n3='$n3')-g' supercellwell_seed_${Seed}.f
 sed -i -e '58s-idum=2-idum='${Seed}'-g' supercellwell_seed_${Seed}.f
 
 if [ $Indium == "100" ]
   then
-    sed -i -e 's-y=0.15d0-y=1.0d0-g' supercellwell_seed_${Seed}.f
+    sed -i -e 's-y=0.0d0-y=1.0d0-g' supercellwell_seed_${Seed}.f
   else
-    sed -i -e 's-y=0.15d0-y=0.'${Indium}'d0-g' supercellwell_seed_${Seed}.f
+    sed -i -e 's-y=0.0d0-y=0.'${Indium}'d0-g' supercellwell_seed_${Seed}.f
   fi
 
 ${FC} -o supercellwell.out supercellwell_seed_${Seed}.f ${Fflags}
