@@ -1,0 +1,42 @@
+diff --git a/src/CLASS2/bond_class2.cpp b/src/CLASS2/bond_class2.cpp
+index 8c5d815..73609b7 100644
+--- a/src/CLASS2/bond_class2.cpp
++++ b/src/CLASS2/bond_class2.cpp
+@@ -16,6 +16,10 @@
+    Contributing author: Eric Simon (Cray)
+ ------------------------------------------------------------------------- */
+ 
++// DSP-Tan: This potential has been modified so K3 term is linear, and r0 is 0: E = K3*r + K2(r-r_0)^2 + K4(r-r_0)^4 
++// Note the born matrix calculations will not work correctly, as this has not been updated, so if you want to get elastic
++// constants back out, you must modify that as well.
++
+ #include "bond_class2.h"
+ 
+ #include "atom.h"
+@@ -88,11 +92,11 @@ void BondClass2::compute(int eflag, int vflag)
+ 
+     // force & energy
+ 
+-    de_bond = 2.0*k2[type]*dr + 3.0*k3[type]*dr2 + 4.0*k4[type]*dr3;
++    de_bond = 2.0*k2[type]*dr + k3[type] + 4.0*k4[type]*dr3;
+     if (r > 0.0) fbond = -de_bond/r;
+     else fbond = 0.0;
+ 
+-    if (eflag) ebond = k2[type]*dr2 + k3[type]*dr3 + k4[type]*dr4;
++    if (eflag) ebond = k2[type]*dr2 + k3[type]*r + k4[type]*dr4;
+ 
+     // apply force to each of 2 atoms
+ 
+@@ -220,10 +224,10 @@ double BondClass2::single(int type, double rsq, int /*i*/, int /*j*/, double &ff
+   double dr2 = dr*dr;
+   double dr3 = dr2*dr;
+   double dr4 = dr3*dr;
+-  double de_bond = 2.0*k2[type]*dr + 3.0*k3[type]*dr2 + 4.0*k4[type]*dr3;
++  double de_bond = 2.0*k2[type]*dr + k3[type] + 4.0*k4[type]*dr3;
+   if (r > 0.0) fforce = -de_bond/r;
+   else fforce = 0.0;
+-  return (k2[type]*dr2 + k3[type]*dr3 + k4[type]*dr4);
++  return (k2[type]*dr2 + k3[type]*r + k4[type]*dr4);
+ }
+ 
+ /* ---------------------------------------------------------------------- */
