@@ -110,7 +110,7 @@ make -j $compileCores     # using all the cores can tend to crash
 make install
 mv lmp lmp_intel
 
-chown -R $user /home/${user}/lammps_intel
+chown -R $user /home/${user}/
 echo 'export PATH=/home/'${user}'/lammps_intel/build:$PATH'     >> /home/${user}/.bashrc
 
 
