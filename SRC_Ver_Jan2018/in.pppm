@@ -47,7 +47,10 @@ kspace_style pppm 1e-8            # This is the fastest way to compute the coulo
 
 dump     1    all  custom 10000 dump.lammps   id   x      y      z   #This specifies what quantities are written to the dump.lammps file, and how often. 
                                                                      #The command means that every 10000 steps the id and x,y,z positions of all atoms are printed to a file.
-dump_modify 1 format "%6d %11.6lf %11.6lf %11.6lf"
+
+
+#dump_modify 1 format "%6d %11.6lf %11.6lf %11.6lf"                  #You must use this for older versions of lammps; for newer need "line" included
+dump_modify 1 format line "%6d %11.6lf %11.6lf %11.6lf"
 restart 10000 large*.restart                                         #This means a restart file is written every 10000 steps. These restart files should be deleted if the relaxation worked as they are large.
 
 group corner id 1                                                    #This designates the corner atom as atom 1. This is the atom which will be held fixed.

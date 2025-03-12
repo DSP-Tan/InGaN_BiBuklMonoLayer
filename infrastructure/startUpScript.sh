@@ -57,6 +57,14 @@ echo 'export LD_LIBRARY_PATH=/opt/intel/oneapi/compiler/2024.0/lib:$LD_LIBRARY_P
 source /opt/intel/oneapi/setvars.sh
 
 ################################################################################
+######## Clone this repo to the VM and compile the preproc codes ###############
+################################################################################
+echo -e "\n\n\n--------------------------------------------------------------------------"
+echo "Clone InGaN repo and compile codes"
+echo -e "--------------------------------------------------------------------------\n\n\n"
+git clone git@github.com:DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/InGaN
+
+################################################################################
 ######## Stable lammps installation using intel compiler  ######################
 ################################################################################
 echo -e "\n\n\n--------------------------------------------------------------------------"
@@ -66,6 +74,8 @@ echo -e "-----------------------------------------------------------------------
 git clone -b stable_29Aug2024 --depth 1 https://github.com/lammps/lammps.git /home/${user}/lammps_intel
 
 ## Make modifications to bond_class2 in order to implement III-N wurtzite potential's linear term
+cd /home/${user}/lammps_intel/src
+git apply /home/${user}/InGaN/infrastructure/intelClass2diff.txt
 
 cd /home/${user}/lammps_intel
 mkdir -p build
@@ -98,13 +108,6 @@ mv lmp lmp_intel
 chown -R $user /home/${user}/lammps_intel
 echo 'export PATH=/home/'${user}'/lammps_intel/build:$PATH'     >> /home/${user}/.bashrc
 
-################################################################################
-######## Clone this repo to the VM and compile the preproc codes ###############
-################################################################################
-echo -e "\n\n\n--------------------------------------------------------------------------"
-echo "Clone InGaN repo and compile codes"
-echo -e "--------------------------------------------------------------------------\n\n\n"
-git clone git@github.com:DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/InGaN
 
 # Note, to run these newer versions of lammps you must execute like this: 
 # export OMP_NUM_THREADS=8
