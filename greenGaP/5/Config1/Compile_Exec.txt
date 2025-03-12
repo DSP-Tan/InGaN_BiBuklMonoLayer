@@ -1,0 +1,7 @@
+(n1,n2,n3) = (32,32,40)
+Seed = 2
+Indium Content = 05
+well starts at nz = 21
+well ends at nz = 32
+well width fluctuation starts at  = 19
+well width fluctuation ends at = 20
