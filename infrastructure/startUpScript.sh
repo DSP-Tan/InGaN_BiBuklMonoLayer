@@ -62,7 +62,8 @@ source /opt/intel/oneapi/setvars.sh
 echo -e "\n\n\n--------------------------------------------------------------------------"
 echo "Clone InGaN repo and compile codes"
 echo -e "--------------------------------------------------------------------------\n\n\n"
-git clone git@github.com:DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/InGaN
+#git clone git@github.com:DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/InGaN
+git clone https://github.com/DSP-Tan/InGaN_BiBuklMonoLayer.git /home/${user}/InGaN
 
 ################################################################################
 ######## Stable lammps installation using intel compiler  ######################
