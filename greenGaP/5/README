@@ -1,0 +1,4 @@
+For some reason, as you can see from the bash script "shell", here the random number
+seed of each configuration is <#config> + 1.
+
+There were 175 5% configurations.
