@@ -3,5 +3,8 @@ Seed = 2
 Indium Content = 05
 well starts at nz = 21
 well ends at nz = 32
+wwf is true
+wwf is centred at (16.5,16.5)
 well width fluctuation starts at  = 19
-well width fluctuation ends at = 20
+well width fluctuation ends at    = 20
+/home/daniel/InGaN/SupercellSRC/compile_execute_QW_InGaN 32 32 40 2 05 21 32 true  19 20

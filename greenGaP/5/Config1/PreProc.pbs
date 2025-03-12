@@ -26,8 +26,8 @@ echo $PATH
 
 cd ${PBS_O_WORKDIR}
 
-~/Josh_scripts/SupercellSRC/compile_execute_QW_InGaN 32 32 40 2 05 21 32 true 19 20
-/sfihome/stefan.schulz/Daniel_Scripts_4_Conversion/GulpToLammpsSRC/SRC_Ver_Jun2016/mai supercell_corr2.dat /sfihome/stefan.schulz/Daniel_Scripts_4_Conversion/GulpToLammpsSRC/SRC_Ver_Jun2016/Pots > mai.txt
+../../../SupercellSRC/compile_execute_QW_InGaN 32 32 40 2 05 21 32 true 19 20
+../../../SRC_Ver_Jan2018/mai supercell_corr2.dat /sfihome/stefan.schulz/Daniel_Scripts_4_Conversion/GulpToLammpsSRC/SRC_Ver_Jun2016/Pots > mai.txt
 
 #for i in `seq 31 60`
 #do

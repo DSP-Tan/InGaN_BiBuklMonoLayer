@@ -28,7 +28,7 @@ for i in `seq 106 130`
 do
    cd Config${i}
    #/sfihome/local/pgi1510/linux86-64/2015/mpi/mpich/bin/mpirun -np 40 -machinefile ${PBS_NODEFILE} lmp_pgi < ../in.pppm > NewLammps.txt
-   mpirun -np 4  lmp_intel < ../in.pppm > NewLammps.txt
+   mpirun -np 4 lmp_intel -in ../../../SRC_Ver_Jan2018/in.pppm > NewLammps
    ../Posish log.lammps Gulp.gin dump.lammps > PositionsOutput.txt
    cd ..
 done
