@@ -75,7 +75,11 @@ git clone -b stable_29Aug2024 --depth 1 https://github.com/lammps/lammps.git /ho
 
 ## Make modifications to bond_class2 in order to implement III-N wurtzite potential's linear term
 cd /home/${user}/lammps_intel/src
-git apply /home/${user}/InGaN/infrastructure/intelClass2diff.txt
+git apply /home/${user}/InGaN/infrastructure/lammpsClass2.patch
+echo -e "\n\n\n--------------------------------------------------------------------------"
+echo "The following diff has been applied to the lammps repo:"
+git diff
+echo -e "--------------------------------------------------------------------------\n\n\n"
 
 cd /home/${user}/lammps_intel
 mkdir -p build

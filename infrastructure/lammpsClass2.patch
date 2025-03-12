@@ -6,7 +6,7 @@ index 8c5d815..73609b7 100644
     Contributing author: Eric Simon (Cray)
  ------------------------------------------------------------------------- */
  
-+// DSP-Tan: This potential has been modified so K3 term is linear, and r0 is 0: E = K3*r + K2(r-r_0)^2 + K4(r-r_0)^4 
++// DSP-Tan: This potential has been modified so K3 term is linear, and r0 is 0: E = K3*r + K2(r-r_0)^2 + K4(r-r_0)^4
 +// Note the born matrix calculations will not work correctly, as this has not been updated, so if you want to get elastic
 +// constants back out, you must modify that as well.
 +
