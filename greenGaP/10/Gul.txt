@@ -1,0 +1,10 @@
+optim conj distance #prop 
+dump every 30 gulp.res
+maxcyc 4000
+cutd 3.0
+#fit conp
+cell
+102.040224 88.369426 104.880682 90.000000 90.000000 90.000000 0 0 1 0 0 0
+#
+#
+frac
