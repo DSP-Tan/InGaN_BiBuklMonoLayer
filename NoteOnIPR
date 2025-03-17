@@ -1,0 +1,9 @@
+The IPR is essentially the inverse of the number of sites at which the wavefunction has a non-zero
+amplitude. Furthermore this number is weighted by how large the probability density on this site is.
+
+It is the wavefunction to the power of 4, evaluated at every point in the crystal. Or the square of the
+probability density integrated over the whole crystal.
+
+It has to be the square of this because if it was left as just the probability density it would be 1 always.
+When you square the density it emphasises how much wavefunction is at a given site, and if there's a small amount,
+this will be accounted for in the summation, as the square will reduce its amplitude.

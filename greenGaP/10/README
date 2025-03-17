@@ -7,4 +7,5 @@ This is not too important for reproducing the results however,
 given that we are interested in robust statistical averages,
 resampling with different random seeds will not change the results anyway
 
-
+In config1 we have an example output of the eigen values from our Hamiltonian
+diagonalisation code jdqr.m, eigenwerte2_electrons.m, eigenwerte2_holes.m

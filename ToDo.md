@@ -72,3 +72,21 @@ We will first implement the testing framework for the supercell code using git w
 same thing for GulpToLammps. Eventually we will also test the lammps installation to make sure we are
 getting the same initial energies. For that we can only just save the output of a log.lammps and test
 the first energy, and then run a code which will compare the final positions.
+
+# Reproducibility
+
+Once we have one example of one configuration for which we know the supercell is exactly correct, and
+for which we  have the electronic structure outputs, then we have enough. For the other configs the exact
+configuration and things like this are not important.
+
+In any case we do not have Stefan's hamiltonian producer, and we do not know how to the tight binding
+pure InN and pure GaN were parameterised anyway. We don't know how S is produced. In addition there were
+further changes in the relaxation, certain extra modifciations to change how much it relaxed so that 
+the potential energy drop in the well was correct, which we also did not know about. So let's just have
+as much as we can for one single configuration, and then accept the fact that this was so sketchy we wouldn't
+want to reproduce those parts of it anyway.
+
+# Gulp/Lammps Folder
+
+Gather all example gulp/lammps inputs into folders outside all the other folders. So you can have one InGaN .gin 
+file and one InGaN in.pppm file in the outside and make a reference to in each of the indium contents afterwards.
