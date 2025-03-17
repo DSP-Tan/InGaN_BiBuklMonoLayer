@@ -1,0 +1,10 @@
+#!/bin/bash
+rm Forces.txt
+for i in `seq 11 25`
+do
+ echo ${i} >> Forces.txt 
+ sed -n 78p ${i}_Config/log.lammps >> Forces.txt
+## rm ${i}_Config/LammpsNeat.txt
+## rm ${i}_Config/*.restart
+## sed -n 79p ${i}_Config/log.lammps >> Forces2.txt
+done

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+
+for i in `seq 156 180`
+do 
+   mkdir Config${i}
+   cd Config${i}
+   fart=`echo "$i+374" | bc`
+   sed -e 's_XXX_'${fart}'_g' ../PreProc.pbs > PreProc.pbs
+   qsub PreProc.pbs
+   cd ..
+done

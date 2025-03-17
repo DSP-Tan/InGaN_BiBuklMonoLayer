@@ -1,0 +1,9 @@
+Config 11 onwards here are the same as those contained in ../25/
+
+We know at at least Config156 onwards will have the seed as shown
+in shell.
+
+Perhaps this combined with the earlier statement means that config 11 
+to 180 are all with seds set as done in shell. Anyway it doen't matter
+as we are taking averages of the whole; so you could just resample the cells.
+

@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -r n
+#PBS -m bea
+#PBS -M daniel.tanner@tyndall.ie
+#PBS -N PostProc25
+#PBS -q default
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=12:00:00.00
+
+
+
+export PATH=$PATH:/gpfs/sfihome/daniel.tanner/LammpsCopy/lammps-30Oct14/src
+export PATH=$PATH:/local/pgi147/linux86-64/2014/mpi/mpich/bin
+export PATH=$PATH:/local/pgi147/linux86-64/2014/mpi/mpich/lib
+
+
+#--------------------------------
+NP=`wc -l ${PBS_NODEFILE}`
+#-------------------------------
+#  MPI run command:
+#------------------------------
+
+echo cpus: $NP
+echo nodes: `cat ${PBS_NODEFILE}`
+echo $PATH
+
+cd ${PBS_O_WORKDIR}
+
+
+for i in `seq 26 55`
+do
+   cd Config${i}; 
+   ../Posish log.lammps Gulp.gin dump.lammps > PositionsOutput.txt
+   cd ..
+done
+
+
+
+
+
