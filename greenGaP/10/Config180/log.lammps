@@ -1,0 +1,264 @@
+LAMMPS (16 Feb 2016)
+# Initialize:
+
+clear            #This clears all variables
+units metal      #These units are Angstrom, eV, ps, bars etc. see: http://lammps.sandia.gov/doc/units.html
+dimension 3      #3 dimensional
+boundary p p p   #This specifies the boundary type at the endges of the cell as defined in data.lammps. For periodic boundary conditions it is best to have a rectangular cell.
+atom_style full  #This is an atom style where both molecular and charge peroperties are specified. This command will dicate how the atomic information is entered in the data file.
+                 #it is a waste of memory and inefficient to have a style which specifies more information than you need. So, if you were using a VFF without charge for example,
+                 #"atom_style angle" may be more efficient. See the data file, and: http://lammps.sandia.gov/doc/atom_style.html
+
+
+#The commands below set the angular and bond interaction terms. Two things should be noted about the "class2" package
+#1.These are  not within the default lammps installation.
+#  Check these are installed by inputting make ps, which should give:
+#  Installed YES: package CLASS2
+#    src/bond_class2.cpp and CLASS2/bond_class2.cpp are different
+#  amongst information about all other packages.
+#
+#2.bond_style class2 has been modified to include the linear repulsive term of Martin's potential. This is why the command above informs us that the original "CLASS2/bond_class2.cpp" and the one
+#with which lammps is compiled are different.
+
+angle_style class2 # This is the lammps angle_style which allows for bond/angle interactions and bond/bond interactions, as well as 3rd and 4th order angle terms. http://lammps.sandia.gov/doc/angle_class2.html
+bond_style class2  # This is the lammps bond_style which allows for higher order bond terms. However, the source code for this interaction has been changed in order to incorporate the linear repulsive term
+                   # which is needed to keep the crystal stable. This changed code can be found in the lammps src folder. It's bond_class2.cpp
+
+# Read the atom positions from data file
+read_data data.lammps  # What will be in this data file depends on the types of potentials and types of atoms. See the preprocessing code,
+  orthogonal box = (0 0 0) to (102.048 88.3736 103.72)
+  4 by 2 by 5 MPI processor grid
+  reading atoms ...
+  81920 atoms
+  scanning bonds ...
+  4 = max bonds/atom
+  scanning angles ...
+  6 = max angles/atom
+  reading bonds ...
+  163840 bonds
+  reading angles ...
+  491520 angles
+  4 = max # of 1-2 neighbors
+  12 = max # of 1-3 neighbors
+  48 = max # of 1-4 neighbors
+  41 = max # of special neighbors
+                       # the data.lammps file itself, and: http://lammps.sandia.gov/doc/read_data.html.
+                       # The data file for miguel's potential contains: cell parameters, atomic charges, positions, types and ids.
+                       # List of bond pairs
+                       # List of angle triplets
+                       # Vff potential data for all bond pairs and all angle triplets, which will depend on which atom types are in the bonds/angles
+
+neighbor 2.1 bin       # This means that the neighbour list for a particular atom will include all atoms within the greatest force cutoff distance, plus the "skin distance" of 2.1.
+                       # The default is 2.0. This is not reallly a necessary change. It was just made during some test some time.
+                       # http://lammps.sandia.gov/doc/neighbor.html
+
+special_bonds lj/coul 1.0 1.0 1.0 # This ensures that there is no screening of the coulomb interaction between bonded atom pairs. This "screening" is effectively done with the linear repulsive term.
+  4 = max # of 1-2 neighbors
+  4 = max # of special neighbors
+pair_style coul/long 15           # The 15 here is the real space cutoff for the calculation of coulombic interactions. The longer this is the faster the calculation but lots of memory needs to be used
+                                  # because of the very long neighbour lists. This has been played with to get a good speed.
+pair_coeff * *                    # Since this is the coulomb interaction no pair coefficients beyond those specified in the data file are needed. The * * are some sort of shortcuts terms.
+pair_modify table 0               # This setting is reccommended for greatest accuracy of the force evaluations. 0 means no tabulation approximation is made.
+                                  # This is where a table of the coulomb forces and energies is made before calculation and then these tabulated values are interpolated between and this is quicker
+                                  # than directly evaluating the coulomb interaction every time.
+
+kspace_style pppm 1e-8            # This is the fastest way to compute the coulombic forces. The 1e-8 specifies the accuracy, and this was checked against other ewald calculation methods to be accurate and fast.
+
+dump     1    all  custom 10000 dump.lammps   id   x      y      z   #This specifies what quantities are written to the dump.lammps file, and how often.
+                                                                     #The command means that every 10000 steps the id and x,y,z positions of all atoms are printed to a file.
+dump_modify 1 format "%6d %11.6lf %11.6lf %11.6lf"
+restart 10000 large*.restart                                         #This means a restart file is written every 10000 steps. These restart files should be deleted if the relaxation worked as they are large.
+
+group corner id 1                                                    #This designates the corner atom as atom 1. This is the atom which will be held fixed.
+1 atoms in group corner
+fix cornerfix corner setforce 0.0 0.0 0.0                            #This fixes the corner atom in place.
+thermo_style custom step pe ebond epair eangle                       #This specifies what is written in the log.lammps file.
+                                                                     #It prints the step, the potential energy, the bond energy, the pair energy and angle energy
+
+min_modify line quadratic                                            #The quadratic style is reccommended as the best linesearch style to get a low minimisation
+min_style cg                                                         #min_style cg means use conjugate gradient minimisation
+
+#Relaxing in this three step method results in quicker relaxations which get to lower energies. It also
+#solved the problem of certain supercells which would get "stuck" whilst relaxing and relax with some large forces.
+#This method was reccommended in lammps documentation somewhere and has turned out very well in actual relaxations.
+
+#Relax only atomic positions with low tolerance
+minimize 1e-12 1e-12 5000000 100000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+PPPM initialization ...
+  G vector (1/distance) = 0.26996
+  grid = 288 270 300
+  stencil order = 5
+  estimated absolute RMS force accuracy = 1.7573e-07
+  estimated relative force accuracy = 1.22038e-08
+  using double precision FFTs
+  3d grid and FFT values/proc = 860378 622080
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  max neighbors/atom: 2000, page size: 100000
+  master list distance cutoff = 17.1
+  ghost atom cutoff = 17.1
+  binsize = 8.55 -> bins = 12 11 13
+Memory usage per processor = 104.39 Mbytes
+Step PotEng E_bond E_pair E_angle 
+       0   -746308.33   -373804.23   -372657.86    153.75839 
+     276   -747368.66   -375391.91   -372219.15    242.39588 
+Loop time of 1458.15 on 40 procs for 276 steps with 81920 atoms
+
+99.8% CPU use with 40 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -746308.332324     -747368.658338     -747368.658338
+  Force two-norm initial, final = 236.847 0.00461587
+  Force max component initial, final = 2.60876 4.56697e-05
+  Final line search alpha, max atom move = 1 4.56697e-05
+  Iterations, force evaluations = 276 552
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 82.517     | 98.182     | 109.95     |  69.2 |  6.73
+Bond    | 2.1568     | 2.4864     | 2.8695     |  10.5 |  0.17
+Kspace  | 1342.2     | 1354.4     | 1370.5     |  19.1 | 92.88
+Neigh   | 0.14471    | 0.14545    | 0.14629    |   0.1 |  0.01
+Comm    | 1.8951     | 2.2651     | 2.5323     |   9.7 |  0.16
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.0048695  | 0.0055061  | 0.0060902  |   0.4 |  0.00
+Other   |            | 0.6916     |            |       |  0.05
+
+Nlocal:    2048 ave 2290 max 1878 min
+Histogram: 5 7 3 4 7 5 3 2 2 2
+Nghost:    20107 ave 20277 max 19865 min
+Histogram: 2 2 2 3 5 7 4 3 7 5
+Neighs:    1.8946e+06 ave 2.21704e+06 max 1.67406e+06 min
+Histogram: 7 5 1 10 3 3 5 2 2 2
+
+Total # of neighbors = 75784038
+Ave neighs/atom = 925.098
+Ave special neighs/atom = 4
+Neighbor list builds = 1
+Dangerous builds = 0
+
+#Relax with fix box relax and higher tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0
+minimize 1e-25 1e-25 5000000 100000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+PPPM initialization ...
+  G vector (1/distance) = 0.26996
+  grid = 288 270 300
+  stencil order = 5
+  estimated absolute RMS force accuracy = 1.7573e-07
+  estimated relative force accuracy = 1.22038e-08
+  using double precision FFTs
+  3d grid and FFT values/proc = 860378 622080
+Memory usage per processor = 104.39 Mbytes
+Step PotEng E_bond E_pair E_angle 
+     276   -747368.66   -375391.91   -372219.15    242.39588 
+     336   -747388.74   -375942.64   -371671.74    225.64028 
+Loop time of 287.802 on 40 procs for 60 steps with 81920 atoms
+
+99.8% CPU use with 40 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -747368.658338     -747388.741761     -747388.741761
+  Force two-norm initial, final = 9451.9 0.471878
+  Force max component initial, final = 9451.9 0.441475
+  Final line search alpha, max atom move = 5.52781e-08 2.44039e-08
+  Iterations, force evaluations = 60 98
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 15.391     | 17.583     | 20.667     |  34.3 |  6.11
+Bond    | 0.42016    | 0.45926    | 0.51159    |   3.6 |  0.16
+Kspace  | 203.82     | 206.95     | 209.2      |  10.2 | 71.91
+Neigh   | 0.13945    | 0.14044    | 0.14153    |   0.2 |  0.05
+Comm    | 0.36972    | 0.45055    | 0.51079    |   4.5 |  0.16
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.00077295 | 0.00090729 | 0.0010102  |   0.2 |  0.00
+Other   |            | 62.22      |            |       | 21.62
+
+Nlocal:    2048 ave 2290 max 1878 min
+Histogram: 5 7 3 4 7 4 5 2 1 2
+Nghost:    20107 ave 20277 max 19865 min
+Histogram: 2 1 2 5 4 7 4 3 7 5
+Neighs:    1.88572e+06 ave 2.20353e+06 max 1.67092e+06 min
+Histogram: 7 5 4 7 3 3 4 3 2 2
+
+Total # of neighbors = 75428910
+Ave neighs/atom = 920.763
+Ave special neighs/atom = 4
+Neighbor list builds = 1
+Dangerous builds = 0
+
+#Relax with with nreset and high tolerance
+fix relax all box/relax fixedpoint 0 0 0 z 0 nreset 100
+minimize 1e-25 1e-25 5000000 100000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+PPPM initialization ...
+  G vector (1/distance) = 0.269915
+  grid = 288 270 300
+  stencil order = 5
+  estimated absolute RMS force accuracy = 1.76353e-07
+  estimated relative force accuracy = 1.22471e-08
+  using double precision FFTs
+  3d grid and FFT values/proc = 860378 622080
+Memory usage per processor = 104.39 Mbytes
+Step PotEng E_bond E_pair E_angle 
+     336   -747388.74   -375942.64   -371671.74    225.64028 
+     337   -747388.74   -375942.64   -371671.74    225.64028 
+Loop time of 73.5439 on 40 procs for 1 steps with 81920 atoms
+
+99.8% CPU use with 40 MPI tasks x no OpenMP threads
+
+Minimization stats:
+  Stopping criterion = linesearch alpha is zero
+  Energy initial, next-to-last, final = 
+        -747388.741959     -747388.741959     -747388.741959
+  Force two-norm initial, final = 0.473445 0.473445
+  Force max component initial, final = 0.443149 0.443149
+  Final line search alpha, max atom move = 5.50922e-08 2.44141e-08
+  Iterations, force evaluations = 1 25
+
+MPI task timing breakdown:
+Section |  min time  |  avg time  |  max time  |%varavg| %total
+---------------------------------------------------------------
+Pair    | 4.0379     | 4.6149     | 5.4162     |  17.8 |  6.28
+Bond    | 0.11052    | 0.12074    | 0.13423    |   1.9 |  0.16
+Kspace  | 51.811     | 52.624     | 53.216     |   5.4 | 71.56
+Neigh   | 0.13886    | 0.13996    | 0.14091    |   0.2 |  0.19
+Comm    | 0.10177    | 0.12438    | 0.14231    |   2.4 |  0.17
+Output  | 0          | 0          | 0          |   0.0 |  0.00
+Modify  | 0.00019574 | 0.00023926 | 0.00028825 |   0.1 |  0.00
+Other   |            | 15.92      |            |       | 21.65
+
+Nlocal:    2048 ave 2290 max 1878 min
+Histogram: 5 7 3 4 7 4 5 2 1 2
+Nghost:    20107 ave 20277 max 19865 min
+Histogram: 2 1 2 5 4 7 4 3 7 5
+Neighs:    1.88572e+06 ave 2.20353e+06 max 1.67092e+06 min
+Histogram: 7 5 4 7 3 3 4 3 2 2
+
+Total # of neighbors = 75428910
+Ave neighs/atom = 920.763
+Ave special neighs/atom = 4
+Neighbor list builds = 1
+Dangerous builds = 0
+
+
+variable lengthx equal "lx"
+variable lengthy equal "ly"
+variable lengthz equal "lz"
+
+print "a= ${lengthx};"
+a= 102.047996521;
+print "b= ${lengthy};"
+b= 88.373565674;
+print "c= ${lengthz};"
+c= 104.160349576162;
+Total wall time: 0:30:30

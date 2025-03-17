@@ -1,0 +1,10 @@
+There were 180 10% configs.
+
+From "shell", we can see that from at least config 156
+onwards the random cell seed was 370+#Config.
+
+This is not too important for reproducing the results however,
+given that we are interested in robust statistical averages,
+resampling with different random seeds will not change the results anyway
+
+

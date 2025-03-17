@@ -1,0 +1,9 @@
+(n1,n2,n3) = (32,32,40)
+Seed = 550
+Indium Content = 10
+well starts at nz = 21
+well ends at nz = 32
+wwf is true
+wwf is centred at (16.5,16.5)
+well width fluctuation starts at  = 19
+well width fluctuation ends at = 20
