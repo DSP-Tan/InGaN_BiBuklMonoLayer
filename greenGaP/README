@@ -1,0 +1,25 @@
+In all these folders there should be a "Compile_Exec.txt" which
+tells you exactly the settings used to produce each supercell_corr2.dat file.
+This file is then converted into a lammps data.lammps file (These have been removed),
+and then this is relaxed using lammps and the final relaxed positions are contained
+in the files "positions.dat"
+
+
+We are going to have these 5, 10, 15, 25 % InGaN wells, the 15% with and without wwfs
+and of different heights, all contained together in one github repo. The github repo
+will show how to reproduce any of the configurations (which we can do test runs of)
+and how to do the subsequent electronic structure calculations. We can then delete
+all the mess that is left behind.
+
+
+- The 5% is a fresh 5% that was made for the green gap paper. This and also the folders
+  whiwh are just numbers can be easily reproduced and you can start with these for the 
+  green-gap paper.
+
+- For the other In contents however, they started with the RSC paper,
+  and were then added to in subsequent papers. This makes the issue very
+  messy, and what we should actually do is just show how their averages could be 
+  reproduced statistically. If This is not possible, then they are not worth
+  reproducing or keeping.
+
+- As you will not be reproducing all the data, you can have a folder for each paper.
